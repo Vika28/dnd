@@ -5,6 +5,8 @@ import {DndProvider, useDrag, useDrop} from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import {ItemTypes} from "./ItemTypes";
 import {useState} from "react";
+import {all_blocks} from "./AllBlocks";
+import {COLUMN_NAMES} from "./constants";
 
 const MovableItem = ({name, index, moveCardHandler, setItems}) => {
     // @ts-ignore
@@ -67,11 +69,33 @@ const MovableItem = ({name, index, moveCardHandler, setItems}) => {
         item: { name: name},
         end: (item, monitor) => {
             const dropResult = monitor.getDropResult();
-            if (dropResult && dropResult.name === 'Column 1') {
-                changeItemColumn(item, 'Column 1');
-            } else {
-                changeItemColumn(item, 'Column 2');
+            // if (dropResult && dropResult.name === 'Column 1') {
+            //     changeItemColumn(item, 'Column 1');
+            // } else {
+            //     changeItemColumn(item, 'Column 2');
+            // }
+            if(dropResult) {
+                const {name} = dropResult;
+                const {ALL_BLOCKS, COLUMN_1, COLUMN_2, GENERAL_COLUMN} = COLUMN_NAMES;
+                switch (name) {
+                    case ALL_BLOCKS:
+                        changeItemColumn(item, ALL_BLOCKS);
+                        break;
+                    case COLUMN_1:
+                        changeItemColumn(item, COLUMN_1);
+                        break;
+                    case COLUMN_2:
+                        changeItemColumn(item, COLUMN_2);
+                        break;
+                    case GENERAL_COLUMN:
+                        changeItemColumn(item, GENERAL_COLUMN);
+                        break;
+                    default:
+                        break;
+                }
             }
+
+
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
@@ -87,14 +111,6 @@ const MovableItem = ({name, index, moveCardHandler, setItems}) => {
         </div>
     )
 }
-// const FirstColumn = () => {
-//     return (
-//         <div className='column first-column'>
-//             Column 1
-//             <MovableItem/>
-//         </div>
-//     )
-// }
 
 const Column = ({children, className, title}) => {
     const [, drop] = useDrop({
@@ -115,12 +131,9 @@ const Column = ({children, className, title}) => {
 }
 
 export const App = () => {
-    const [items, setItems] = useState([
-        {id: 1, name: 'Item 1', column: 'Column 1'},
-        {id: 2, name: 'Item 2', column: 'Column 1'},
-        {id: 3, name: 'Item 3', column: 'Column 1'},
-    ])
+    const [items, setItems] = useState(all_blocks);
 
+    const {ALL_BLOCKS, COLUMN_1, COLUMN_2, GENERAL_COLUMN} = COLUMN_NAMES;
     const moveCardHandler = (dragIndex, hoverIndex) => {
         const dragItem = items[dragIndex];
 
@@ -157,14 +170,26 @@ export const App = () => {
         <div className="container">
             {/* Wrap components that will be "draggable" and "droppable" */}
             <DndProvider backend={HTML5Backend}>
-                <Column title='Column 1' className='column first-column'>
-                    {/*{isFirstColumn && Item}*/}
-                    {returnItemsForColumn('Column 1')}
-                </Column>
+                <div className='table_wrapper'>
+                    <div className='table_row'>
+                        <Column title={COLUMN_1} className='table_column first-column'>
+                            {returnItemsForColumn(COLUMN_1)}
+                        </Column>
 
-                <Column title='Column 2' className='column second-column'>
-                    {/*{!isFirstColumn && Item}*/}
-                    {returnItemsForColumn('Column 2')}
+                        <Column title={COLUMN_2} className='table_column second-column'>
+                            {returnItemsForColumn(COLUMN_2)}
+                        </Column>
+                    </div>
+                    <div>
+                        <Column title={GENERAL_COLUMN} className='general_column'>
+                            {returnItemsForColumn(GENERAL_COLUMN)}
+                        </Column>
+                    </div>
+                </div>
+
+
+                <Column title={ALL_BLOCKS} className='column second-column'>
+                    {returnItemsForColumn(ALL_BLOCKS)}
                 </Column>
             </DndProvider>
         </div>
